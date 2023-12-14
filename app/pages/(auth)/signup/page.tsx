@@ -1,23 +1,26 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import CustomInput from "@/app/components/input";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { schema } from "./validation";
 import { useRouter } from "next/navigation";
 import CustomRadioInput from "@/app/components/customRadioInput";
-import { Button } from "react-bootstrap";
+import moment from "moment";
+import Marquee from "react-fast-marquee";
+import { getCurrentDate } from "@/app/utils/helper";
 
+type Phone = {
+  numbers: string;
+  address: string;
+};
 type FormValues = {
   name: string;
   email: string;
   username: string;
   gender: string;
   password: string;
-  phone: {
-    numbers: string;
-    address: string;
-  }[];
+  phone: Phone[];
   // Addres: {
   //   add: string;
   // }[];
@@ -28,8 +31,11 @@ const SignUp = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitSuccessful, isSubmitted, isSubmitting },
     reset,
+    watch,
+    setValue,
+    getValues,
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -42,21 +48,44 @@ const SignUp = () => {
       // Addres: [{ add: "" }],
     },
   });
-  const onSubmit = (value: any) => {
-    alert("hello");
-    console.log("value is", value);
-    reset();
+  // setValue("username", "Jane");
+  // console.log(watch("username"));
+  // const uni = watch("username");
+
+  // if (uni === "jhenna") {
+  //   alert("hello");
+  // }
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      reset();
+    }
+  }, [reset]);
+  const onSubmit = async (value: any) => {
+    setTimeout(() => {
+      alert("hello");
+      console.log("value is", value);
+    }, 3000);
   };
+  const onError = () => {
+    alert("error");
+  };
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "phone",
   });
-
+  const time = getCurrentDate();
+  // console.log("isSubmitting", isSubmitting);
   return (
     <div className=" h-screen w-[50%] mx-auto">
+      <p>{time}</p>
+      <Marquee speed={60}>
+        I can be a React component, multiple React components, or just some
+        text.
+      </Marquee>
       <h3>eTranzact eCommerce</h3>
       <p>Create an account to list your own products</p>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit, onError)}>
         <div className="mt-2">
           <Controller
             control={control}
@@ -114,13 +143,13 @@ const SignUp = () => {
                   <CustomRadioInput
                     Value="male"
                     text="male"
-                    Name="male"
+                    Name="gender"
                     onChangeText={onChange}
                   />{" "}
                   <CustomRadioInput
                     Value="female"
                     text="female"
-                    Name="female"
+                    Name="gender"
                     onChangeText={onChange}
                   />
                 </div>
@@ -154,7 +183,7 @@ const SignUp = () => {
                       <div className="w-[47%]">
                         <Controller
                           control={control}
-                          name="phone"
+                          name={`phone.${index}.numbers`}
                           render={({ field: { onChange, onBlur, value } }) => (
                             <CustomInput
                               labelText="Phone Number"
@@ -163,12 +192,13 @@ const SignUp = () => {
                             />
                           )}
                         />
+                        <p>{errors?.phone?.[index]?.numbers?.message}</p>
                       </div>{" "}
                       <div className="w-[47%]">
                         <Controller
                           control={control}
                           // name="phone.address"
-                          name="phone"
+                          name={`phone.${index}.address`}
                           render={({ field: { onChange, onBlur, value } }) => (
                             <CustomInput
                               labelText="Address"
@@ -178,6 +208,7 @@ const SignUp = () => {
                           )}
                         />
                       </div>
+                      <p>{errors?.phone?.[index]?.address?.message}</p>
                     </div>
                     <div>
                       {index >= 1 && (
@@ -188,8 +219,6 @@ const SignUp = () => {
                     </div>
                   </li>
                 ))}
-
-                <p className="text-red">{errors.email?.message}</p>
               </div>
             </div>
             <button
@@ -201,8 +230,27 @@ const SignUp = () => {
             </button>
           </div>
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit">{isSubmitting ? "submitting" : "submit"}</button>
       </form>
+      <button
+        onClick={() => {
+          setValue("username", "J");
+        }}
+      >
+        setvalue
+      </button>
+      <button
+        onClick={() => {
+          reset({
+            ...getValues(),
+            name: "bill",
+            username: "gate",
+            password: "2345A*bcvg3",
+          });
+        }}
+      >
+        reset
+      </button>
     </div>
   );
 };
