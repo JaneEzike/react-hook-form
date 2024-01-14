@@ -55,6 +55,16 @@ const SignUp = () => {
   // if (uni === "jhenna") {
   //   alert("hello");
   // }
+  const signUpMutation = useSignUp();
+  const onSubmit = async (data) => {
+    try {
+      const response = await signUpMutation.mutateAsync(data);
+      signUpMutation.isSuccess && toast.success("Signup successful!");
+      console.log(response);
+    } catch (error) {
+      signUpMutation.isError && toast.error(signUpMutation.error.message);
+    }
+  };
   useEffect(() => {
     if (isSubmitSuccessful) {
       reset();
@@ -78,10 +88,8 @@ const SignUp = () => {
   // console.log("isSubmitting", isSubmitting);
   return (
     <div className=" h-screen w-[50%] mx-auto">
-      <p>{time}</p>
       <Marquee speed={60}>
-        I can be a React component, multiple React components, or just some
-        text.
+        <p>{time}</p>
       </Marquee>
       <h3>eTranzact eCommerce</h3>
       <p>Create an account to list your own products</p>
